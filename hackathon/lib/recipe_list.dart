@@ -29,8 +29,7 @@ class RecipeList extends StatelessWidget {
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(recipe.ingredientCount, style: TextStyle(color: Colors.green)),
-                  Text(recipe.source, style: TextStyle(color: Colors.grey)),
+                  Text(recipe.instruction, style: TextStyle(color: Colors.grey)),
                 ],
               ),
               trailing: Icon(Icons.favorite_border),

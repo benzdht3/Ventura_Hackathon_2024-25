@@ -1,18 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:hackathon/recipe_list.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
 import 'favorites.dart';
 import 'menu.dart';
 import 'pantry.dart';
-import 'recipes.dart';
 import 'shopping_list.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'search_provider.dart';
 
 
 const supabaseUrl = '';
 const supabaseKey = String.fromEnvironment('');
 Future<void> main() async {
   // await Supabase.initialize(url: supabaseUrl, anonKey: supabaseKey);
-  runApp(MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => SearchProvider(),
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -20,7 +25,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Pantry App',
+      title: 'ChefMateAI',
       theme: ThemeData(
         primarySwatch: Colors.pink,
       ),
@@ -48,17 +53,15 @@ class _HomeScreenState extends State<HomeScreen> {
     ),
   ];
   late List<Widget> _tabs;
-  
+
   @override
   void initState() {
     super.initState();
-    // Initialize the _tabs list here, where instance members can be accessed
     _tabs = [
       Pantry(),
       Menu(),
       Favorites(),
-      ShoppingList(),
-      RecipeList(recipes: recipes)
+      ShoppingList()
     ];
   }
 
@@ -91,10 +94,6 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icon(Icons.shopping_cart),
             label: 'Shopping List',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart),
-            label: 'Recipes',
-          )
         ],
       ),
     );

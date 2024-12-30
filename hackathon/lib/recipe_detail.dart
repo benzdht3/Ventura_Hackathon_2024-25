@@ -48,7 +48,7 @@ class RecipeDetail extends StatelessWidget {
                           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                         ),
                         Text(
-                          recipe.ingredientCount,
+                          recipe.instruction,
                           style: TextStyle(color: Colors.green),
                         ),
                       ],
@@ -64,58 +64,7 @@ class RecipeDetail extends StatelessWidget {
                   ),
                 ),
               ],
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.star_border, color: Colors.grey),
-                      SizedBox(width: 8),
-                      Text("${recipe.cookingTime} mins", style: TextStyle(color: Colors.grey)),
-                    ],
-                  ),
-                  SizedBox(height: 20),
-                  Text("Tags", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  SizedBox(height: 10),
-                  // Add tags dynamically if available
-                  Text("No tags available"),
-                  SizedBox(height: 20),
-                  Text("Ingredients", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  SizedBox(height: 10),
-                  Column(
-                    children: recipe.ingredients.map((ingredient) {
-                      return Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(ingredient),
-                          Icon(Icons.check_circle, color: Colors.green),
-                        ],
-                      );
-                    }).toList(),
-                  ),
-                  SizedBox(height: 20),
-                  Text("Nutrition Facts", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  SizedBox(height: 10),
-                  Text("Calories: ${recipe.nutritionFacts}"),
-                  SizedBox(height: 20),
-                  Center(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        // Open the recipe source
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.pink,
-                        padding: EdgeInsets.symmetric(vertical: 15, horizontal: 30),
-                      ),
-                      child: Text("View Full Recipe"),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            )
           ],
         ),
       ),
