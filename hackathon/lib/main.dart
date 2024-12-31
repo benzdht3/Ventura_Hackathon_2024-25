@@ -1,26 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'auth_provider.dart';
 import 'favorites.dart';
 import 'menu.dart';
 import 'pantry.dart';
 import 'shopping_list.dart';
 import 'search_provider.dart';
 
-
-const supabaseUrl = '';
-const supabaseKey = String.fromEnvironment('');
 Future<void> main() async {
-  // await Supabase.initialize(url: supabaseUrl, anonKey: supabaseKey);
+  await Supabase.initialize(
+    url: 'supabase_url',
+    anonKey: 'anon_key',
+  );
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => SearchProvider(),
-      child: MyApp(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => SearchProvider()), 
+        ChangeNotifierProvider(create: (context) => AuthProvider()),  
+      ],
+      child: const MyApp(),
     ),
   );
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -29,29 +36,20 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.pink,
       ),
-      home: HomeScreen(),
+      home: const HomeScreen(),
     );
   }
 }
 
 class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
-  List<Recipe> recipes = [
-    Recipe(
-      title: "Scrambled Eggs",
-      imageUrl: "https://example.com/scrambled_eggs.jpg",
-      source: "charlotteslivelykitchen.com",
-      ingredientCount: "You have all the ingredients",
-      ingredients: ["2 eggs", "60 ml full fat milk", "1 tsp butter", "salt and pepper"],
-      nutritionFacts: "198 kcal",
-      cookingTime: 8,
-    ),
-  ];
   late List<Widget> _tabs;
 
   @override

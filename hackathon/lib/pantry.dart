@@ -1,12 +1,26 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:hackathon/login_page.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:http/http.dart' as http;
+
+import 'auth_provider.dart';
+import 'login_page.dart';
+import 'search_provider.dart';
+import 'user_page.dart';
 
 class Pantry extends StatefulWidget {
+  const Pantry({super.key});
+  
   @override
+  // ignore: library_private_types_in_public_api
   _PantryState createState() => _PantryState();
 }
 
 class _PantryState extends State<Pantry> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late stt.SpeechToText _speech;
   bool _isListening = false;
   String _spokenText = '';
@@ -16,9 +30,10 @@ class _PantryState extends State<Pantry> {
     final XFile? image = await _picker.pickImage(source: source);
 
     if (image != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
         SnackBar(content: Text('Image selected: ${image.name}')),
       );
+      await detectIngredientByImage(image);
     }
   }
 
@@ -49,6 +64,33 @@ class _PantryState extends State<Pantry> {
     }
   }
 
+  Future<void> detectIngredientByImage(XFile image) async {
+    const String apiUrl = 'http://35.226.32.22:3000/api/v1/detect_ingredient/detect';
+    var request = http.MultipartRequest('POST', Uri.parse(apiUrl));
+    request.files.add(
+      await http.MultipartFile.fromPath(
+        'image_path',
+        image.path,
+        filename: image.name,
+      ),
+    );
+
+    try {
+      var response = await request.send();
+      if (response.statusCode == 201) {
+        var responseBody = await http.Response.fromStream(response);
+        var decodedBody = utf8.decode(responseBody.bodyBytes);
+        var jsonResponse = jsonDecode(decodedBody)['ingredients'];
+        
+        setState(() => Provider.of<SearchProvider>(context, listen: false).addSearchValues(jsonResponse));
+      } else {
+        print('Failed with status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -57,49 +99,71 @@ class _PantryState extends State<Pantry> {
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context);
+    final TextEditingController _ingredientController = TextEditingController();
     List<String> ingredients = Provider.of<SearchProvider>(context).searchValues;
 
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         leading: IconButton(
-          icon: Icon(Icons.person),
+          icon: const Icon(Icons.person),
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => LoginPage()),
-            );
+            if (authProvider.isLoggedIn) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => UserPage()),
+              );
+            } else {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => LoginPage()),
+              );
+            }
           },
         ),
-        title: Text('Pantry'),
+        title: const Text('Pantry'),
         centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(Icons.sort_by_alpha),
-            onPressed: () {},
+            icon: const Icon(Icons.sort_by_alpha),
+            onPressed: () => Provider.of<SearchProvider>(context, listen: false).sortIngredients(),
           ),
         ],
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextField(
+              controller: _ingredientController,
               decoration: InputDecoration(
-                hintText: 'add/remove/paste ingredients',
-                prefixIcon: Icon(Icons.search),
+                hintText: 'add/remove/paste ingredients...',
+                prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
                 ),
               ),
+              onSubmitted: (value) {
+                if (value.isNotEmpty) {
+                  setState(() => Provider.of<SearchProvider>(context, listen: false).updateSearchValues(value));
+                  
+                  _ingredientController.clear();
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Please enter an ingredient')),
+                  );
+                }
+              },
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             Card(
               elevation: 2.0,
               child: ListTile(
-                leading: Icon(Icons.camera_alt, color: Colors.blue),
-                title: Text('Upload or Take a Picture'),
-                subtitle: Text('Identify ingredients via photo'),
+                leading: const Icon(Icons.camera_alt, color: Colors.blue),
+                title: const Text('Upload or Take a Picture'),
+                subtitle: const Text('Identify ingredients via photo'),
                 onTap: () async {
                   showModalBottomSheet(
                     context: context,
@@ -109,16 +173,16 @@ class _PantryState extends State<Pantry> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             ListTile(
-                              leading: Icon(Icons.photo_library),
-                              title: Text('Upload from Gallery'),
+                              leading: const Icon(Icons.photo_library),
+                              title: const Text('Upload from Gallery'),
                               onTap: () {
                                 Navigator.pop(context);
                                 _pickImage(context, ImageSource.gallery);
                               },
                             ),
                             ListTile(
-                              leading: Icon(Icons.camera_alt),
-                              title: Text('Take a Picture'),
+                              leading: const Icon(Icons.camera_alt),
+                              title: const Text('Take a Picture'),
                               onTap: () {
                                 Navigator.pop(context);
                                 _pickImage(context, ImageSource.camera);
@@ -132,7 +196,7 @@ class _PantryState extends State<Pantry> {
                 },
               ),
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             Card(
               elevation: 2.0,
               child: ListTile(
@@ -140,8 +204,8 @@ class _PantryState extends State<Pantry> {
                   _isListening ? Icons.mic : Icons.mic_none,
                   color: _isListening ? Colors.red : Colors.blue,
                 ),
-                title: Text('Use your voice'),
-                subtitle: Text('Dictate many ingredients at once'),
+                title: const Text('Use your voice'),
+                subtitle: const Text('Dictate many ingredients at once'),
                 onTap: () {
                   if (_isListening) {
                     _stopListening();
@@ -151,31 +215,20 @@ class _PantryState extends State<Pantry> {
                 },
               ),
             ),
-            // GestureDetector(
-            //   onTap: () {},
-            //   child: Card(
-            //     elevation: 2.0,
-            //     child: ListTile(
-            //       leading: Icon(Icons.mic, color: Colors.pink),
-            //       title: Text('Use your voice'),
-            //       subtitle: Text('Dictate many ingredients at once'),
-            //     ),
-            //   ),
-            // ),
-            SizedBox(height: 16.0),
-            Text(
+            const SizedBox(height: 16.0),
+            const Text(
               'The only ingredients we assume you have are salt, pepper and water',
               style: TextStyle(fontSize: 14, color: Colors.grey),
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             Wrap(
               spacing: 8.0,
               runSpacing: 8.0,
               children: ingredients.map((ingredient) {
                 return Chip(
                   label: Text(ingredient),
-                  deleteIcon: Icon(Icons.close),
-                  onDeleted: () => Provider.of<SearchProvider>(context, listen: false).removeSearchValue(ingredient);
+                  deleteIcon: const Icon(Icons.close),
+                  onDeleted: () => Provider.of<SearchProvider>(context, listen: false).removeSearchValue(ingredient)
                 );
               }).toList(),
             ),

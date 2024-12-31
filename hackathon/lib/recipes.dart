@@ -1,19 +1,19 @@
 class Recipe {
-  final String title;
+  final String name;
+  final String instructions;
   final String imageUrl;
-  final String instruction;
 
   Recipe({
-    required this.title,
-    required this.imageUrl,
-    required this.instruction,
+    required this.name,
+    required this.instructions,
+    required this.imageUrl
   });
 
   factory Recipe.fromJson(Map<String, dynamic> json) {
     return Recipe(
-      title: json['title'],
-      imageUrl: json['imageUrl'],
-      instruction: json['instruction'],
+      name: json['name'],
+      instructions: json['instructions'],
+      imageUrl: json['imageUrl']
     );
   }
 }

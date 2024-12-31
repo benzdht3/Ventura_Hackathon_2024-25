@@ -4,67 +4,73 @@ import 'recipes.dart';
 class RecipeDetail extends StatelessWidget {
   final Recipe recipe;
 
-  RecipeDetail({required this.recipe});
+  const RecipeDetail({super.key, required this.recipe});
 
   @override
   Widget build(BuildContext context) {
+    String formattedInstructions = recipe.instructions.replaceAllMapped(
+      RegExp(r'(\d\.)'),
+      (match) => '\n${match.group(1)}',
+    );
+
     return Scaffold(
+      appBar: AppBar(
+        title: Text(recipe.name),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Stack(
-              children: [
-                Image.network(
+            recipe.imageUrl.isNotEmpty
+              ? Image.network(
                   recipe.imageUrl,
                   width: double.infinity,
                   height: 250,
                   fit: BoxFit.cover,
-                ),
-                Positioned(
-                  top: 20,
-                  left: 10,
-                  child: IconButton(
-                    icon: Icon(Icons.arrow_back, color: Colors.white),
-                    onPressed: () => Navigator.pop(context),
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    width: double.infinity,
+                    height: 250,
+                    color: Colors.grey,
+                    child: const Icon(Icons.broken_image, size: 100, color: Colors.white),
                   ),
+                )
+              : Container(
+                  width: double.infinity,
+                  height: 250,
+                  color: Colors.grey,
+                  child: const Icon(Icons.image_not_supported, size: 100, color: Colors.white),
                 ),
-                Positioned(
-                  top: 20,
-                  right: 10,
-                  child: Icon(Icons.more_vert, color: Colors.white),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                recipe.name,
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
                 ),
-                Positioned(
-                  bottom: 10,
-                  left: 10,
-                  child: Container(
-                    padding: EdgeInsets.all(10),
-                    color: Colors.white.withOpacity(0.9),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          recipe.title,
-                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          recipe.instruction,
-                          style: TextStyle(color: Colors.green),
-                        ),
-                      ],
-                    ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Instructions",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                ),
-                Positioned(
-                  top: 40,
-                  left: 20,
-                  child: IconButton(
-                    icon: Icon(Icons.arrow_back, color: Colors.black),
-                    onPressed: () => Navigator.pop(context),
+                  const SizedBox(height: 8),
+                  Text(
+                    formattedInstructions.trim(),
+                    style: const TextStyle(fontSize: 16, color: Colors.black87),
                   ),
-                ),
-              ],
-            )
+                ],
+              ),
+            ),
           ],
         ),
       ),

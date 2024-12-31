@@ -6,8 +6,15 @@ class SearchProvider with ChangeNotifier {
   List<String> get searchValues => _searchValues;
 
   void updateSearchValues(String value) {
-    _searchValues = value.split(',').map((e) => e.trim()).toList();
+    List<dynamic> newValues = value.split(',').map((e) => e.trim()).toList();
+    addSearchValues(newValues);
     notifyListeners();
+  }
+
+  void addSearchValues(List<dynamic> values) {
+    for (var value in values) {
+      _searchValues.add(value);
+    }
   }
 
   void removeSearchValue(String value) {
@@ -17,6 +24,11 @@ class SearchProvider with ChangeNotifier {
 
   void addMultipleSearchValues(List<String> values) {
     searchValues.addAll(values);
+    notifyListeners();
+  }
+
+   void sortIngredients() {
+    _searchValues.sort((a, b) => a.compareTo(b));
     notifyListeners();
   }
 }

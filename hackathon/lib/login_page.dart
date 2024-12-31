@@ -1,46 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:hackathon/signup_page.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:provider/provider.dart';
+
+import 'auth_provider.dart';
+import 'signup_page.dart';
 
 class LoginPage extends StatelessWidget {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  Future<void> loginUser(BuildContext context) async {
-    final supabase = Supabase.instance.client;
-    try {
-      await supabase.auth.signInWithPassword(
-        email: emailController.text,
-        password: passwordController.text,
-      );
-      Navigator.pushReplacementNamed(context, '/home');
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Login Failed: $e'),
-      ));
-    }
-  }
+  LoginPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context);
+
     return Scaffold(
-      appBar: AppBar(title: Text('Log in')),
+      appBar: AppBar(title: const Text('Log in')),
       body: Stack(
         children: [
-          Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/background_pattern.png'),
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 TextField(
+                  controller: emailController,
                   decoration: InputDecoration(
                     labelText: 'Email',
                     border: OutlineInputBorder(
@@ -48,8 +32,9 @@ class LoginPage extends StatelessWidget {
                     ),
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 TextField(
+                  controller: passwordController,
                   obscureText: true,
                   decoration: InputDecoration(
                     labelText: 'Password',
@@ -58,44 +43,43 @@ class LoginPage extends StatelessWidget {
                     ),
                   ),
                 ),
-                SizedBox(height: 20),
-                TextField(
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: 'Verify Password',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-                SizedBox(height: 30),
+                const SizedBox(height: 30),
                 ElevatedButton(
-                  onPressed: () => loginUser(context),
+                  onPressed: () => authProvider.loginUser(
+                    context, 
+                    emailController.text, 
+                    passwordController.text 
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.pink, // Button color
-                    padding: EdgeInsets.symmetric(vertical: 15),
+                    padding: const EdgeInsets.symmetric(vertical: 15),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  child: Center(
+                  child: const Center(
                     child: Text(
                       "Let's Cook!",
                       style: TextStyle(fontSize: 18, color: Colors.white),
                     ),
                   ),
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 ElevatedButton(
-                  onPressed: () => SignupPage(),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => SignupPage()),
+                    );
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(255, 106, 155, 125), // Button color
-                    padding: EdgeInsets.symmetric(vertical: 15),
+                    padding: const EdgeInsets.symmetric(vertical: 15),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  child: Center(
+                  child: const Center(
                     child: Text(
                       "Sign up",
                       style: TextStyle(fontSize: 18, color: Colors.white),

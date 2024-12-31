@@ -1,21 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'auth_provider.dart';
 import 'login_page.dart';
+import 'signup_page.dart';
+import 'user_page.dart';
 
 class Favorites extends StatelessWidget {
+  const Favorites({super.key});
+
   @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: Icon(Icons.person),
+          icon: const Icon(Icons.person),
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => LoginPage()),
-            );
+            if (authProvider.isLoggedIn) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => UserPage()),
+              );
+            } else {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => LoginPage()),
+              );
+            }
           },
         ),
-        title: Text('Favorites'),
+        title: const Text('Favorites'),
         centerTitle: true,
       ),
       body: Padding(
@@ -26,13 +41,13 @@ class Favorites extends StatelessWidget {
             TextField(
               decoration: InputDecoration(
                 hintText: 'Find...',
-                prefixIcon: Icon(Icons.search),
+                prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
                 ),
               ),
             ),
-            SizedBox(height: 32.0),
+            const SizedBox(height: 32.0),
             Center(
               child: Column(
                 children: [
@@ -41,22 +56,27 @@ class Favorites extends StatelessWidget {
                     size: 100,
                     color: Colors.grey.shade400,
                   ),
-                  SizedBox(height: 16.0),
-                  Text(
+                  const SizedBox(height: 16.0),
+                  const Text(
                     'Only registered users can save recipes',
                     style: TextStyle(fontSize: 16, color: Colors.grey),
                     textAlign: TextAlign.center,
                   ),
-                  SizedBox(height: 16.0),
+                  const SizedBox(height: 16.0),
                   ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => SignupPage()),
+                      );
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8.0),
                       ),
                     ),
-                    child: Text('Sign up for free'),
+                    child: const Text('Sign up for free'),
                   ),
                 ],
               ),

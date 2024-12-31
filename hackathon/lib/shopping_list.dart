@@ -3,14 +3,17 @@ import 'package:flutter/material.dart';
 import 'login_page.dart';
 
 class ShoppingList extends StatefulWidget {
+  const ShoppingList({super.key});
+
   @override
+ // ignore: library_private_types_in_public_api
  _ShoppingListState createState() => _ShoppingListState();
 }
 
 class _ShoppingListState extends State<ShoppingList> {
   final TextEditingController _controller = TextEditingController();
   final List<String> _shoppingList = [];
-  final Set<String> _checkedItems = Set();
+  final Set<String> _checkedItems = {};
 
   void _addItem() {
     final item = _controller.text.trim();
@@ -29,18 +32,12 @@ class _ShoppingListState extends State<ShoppingList> {
     });
   }
 
-  void _shareList() {
-    final items = _shoppingList.join(', ');
-    // Use a sharing plugin like `share_plus` to implement sharing functionality.
-    print('Sharing list: $items');
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: Icon(Icons.person),
+          icon: const Icon(Icons.person),
           onPressed: () {
             Navigator.push(
               context,
@@ -48,13 +45,7 @@ class _ShoppingListState extends State<ShoppingList> {
             );
           },
         ),
-        title: Text('Shopping List'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.delete),
-            onPressed: _clearCheckedItems,
-          ),
-        ],
+        title: const Text('Shopping List'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -73,14 +64,14 @@ class _ShoppingListState extends State<ShoppingList> {
                     ),
                   ),
                 ),
-                SizedBox(width: 8.0),
+                const SizedBox(width: 8.0),
                 ElevatedButton(
                   onPressed: _addItem,
-                  child: Text('+'),
+                  child: const Text('+'),
                 ),
               ],
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             Expanded(
               child: ListView.builder(
                 itemCount: _shoppingList.length,
@@ -101,7 +92,7 @@ class _ShoppingListState extends State<ShoppingList> {
                     ),
                     title: Text(item),
                     trailing: IconButton(
-                      icon: Icon(Icons.delete),
+                      icon: const Icon(Icons.delete),
                       onPressed: () {
                         setState(() {
                           _shoppingList.remove(item);
@@ -115,11 +106,6 @@ class _ShoppingListState extends State<ShoppingList> {
             ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _shareList,
-        child: Icon(Icons.share),
-        backgroundColor: Colors.green,
       ),
     );
   }
